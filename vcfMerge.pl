@@ -4,14 +4,14 @@ use File::Basename;
 use Getopt::Long;
 use FindBin qw/$Bin/;
 
-my ($plugin_dir,$outdir) = @ARGV;
+my ($report_dir,$outdir) = @ARGV;
 
 # SARS_CoV_2_variantCaller_out.1613/
 # variantCaller_out.1629/
 
 
 # first get all variantCaller_out.* dir
-my $vc_dirs_aref = &get_vc_dir_by_run_time($plugin_dir);
+my $vc_dirs_aref = &get_vc_dir_by_run_time($report_dir);
 
 # for each variantCaller_out.*, creat a new dir
 for my $dir (@{$vc_dirs_aref}){
@@ -163,12 +163,16 @@ sub check_if_cov2_vcf{
 
 sub get_vc_dir_by_run_time{
 	my ($dir) = @_;
-	my @startplugin_json = glob "$dir/*/startplugin.json"; # /results/analysis/output/Home/2019-nCoV-map2hg19-exon-virus_241/plugin_out/variantCaller_out.1257/startplugin.json
+	my @startplugin_json = glob "$dir/plugin_out/*/startplugin.json"; # /results/analysis/output/Home/2019-nCoV-map2hg19-exon-virus_241/plugin_out/variantCaller_out.1257/startplugin.json
 	my @vc_dirs;
 	for my $json (@startplugin_json){
 		my $basedir = dirname($json);
 		my $vc_name = basename($basedir);
-		push @vc_dirs, $vc_name;
+		if ($vc_name =~ /variantCaller/){
+			# variantCaller_out.1257/
+			# SARS_CoV_2_variantCaller_out.1529/
+			push @vc_dirs, $vc_name;
+		}
 	}
 
 	return(\%vc_dirs);

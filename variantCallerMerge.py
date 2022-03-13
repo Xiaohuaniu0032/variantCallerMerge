@@ -15,9 +15,42 @@ import re
 import shutil
 from ion.plugin import *
 
-from django.conf import settings
-from django.template.loader import render_to_string
+#from django.conf import settings
+#from django.template.loader import render_to_string
 
+
+
+
+class variantCallerMerge(IonPlugin):
+  version = '1.0.0.0'
+  envDict = dict(os.environ)
+  author = "longfei.fu@thermofisher.com"
+  runtypes = [RunType.FULLCHIP, RunType.THUMB, RunType.COMPOSITE]
+
+  def merge(self):
+    report_dir = self.envDict['ANALYSIS_DIR'] # /results/analysis/output/Home/Auto_xxx
+    outdir = self.envDict['TSP_URLPATH_PLUGIN_DIR'] # /results/analysis/output/Home/Auto_xxx/plugin_out/variantCallerMerge.x
+    this_dir = self.envDict['DIRNAME']
+    cmd = "perl %s/vcfMerge.pl %s %s" % (this_dir,report_dir,outdir)
+
+    print "report dir is: %s" % (report_dir)
+    print "variantCallerMerge plugin outdir is: %s" % (outdir)
+    print "cmd is: %s" % (cmd)
+    
+    #os.system(cmd)
+    print "Finished the variantCallerMerge plugin."
+
+  def launch(self,data=None):
+    print "Start running the variantCallerMerge plugin."
+    self.merge()
+
+
+if __name__ == "__main__":
+    PluginCLI()
+
+
+
+'''
 class AgriSumToolkit(IonPlugin):
   """ A plugin to create an aggregated report from variantCaller and coverageAnalysis plugin """
   
@@ -70,3 +103,4 @@ class AgriSumToolkit(IonPlugin):
     sys.exit(exit_code)
     
 if __name__ == "__main__": PluginCLI()
+'''
