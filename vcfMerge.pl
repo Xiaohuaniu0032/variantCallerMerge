@@ -16,14 +16,17 @@ my $vc_dirs_aref = &get_vc_dir_by_run_time($report_dir);
 # for each variantCaller_out.*, creat a new dir
 for my $dir (@{$vc_dirs_aref}){
 	# mkdir
-	if (-d "$outdir/$dir"){
-		`rm $outdir/$dir`;
-		`mkdir $outdir/$dir`;
-	}else{
-		`mkdir $outdir/$dir`;
-	}
+	print "creating $outdir/$dir\n";
+	`mkdir $outdir/$dir`;
 
-	my $vc_dir = "$plugin_dir/$dir";
+	#if (-d "$outdir/$dir"){
+	#	`rm $outdir/$dir`;
+	#	`mkdir $outdir/$dir`;
+	#}else{
+	#	`mkdir $outdir/$dir`;
+	#}
+
+	my $vc_dir = "$report_dir/$dir";
 	# get all TSVC_variants.vcf
 	my @vcf = glob "$vc_dir/*/TSVC_variants.vcf";
 

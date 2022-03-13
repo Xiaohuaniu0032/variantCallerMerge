@@ -29,19 +29,30 @@ class variantCallerMerge(IonPlugin):
 
   def merge(self):
     report_dir = self.envDict['ANALYSIS_DIR'] # /results/analysis/output/Home/Auto_xxx
-    outdir = self.envDict['TSP_URLPATH_PLUGIN_DIR'] # /results/analysis/output/Home/Auto_xxx/plugin_out/variantCallerMerge.x
+    outdir = '/results/analysis' + self.envDict['TSP_URLPATH_PLUGIN_DIR'] # /results/analysis/output/Home/Auto_xxx/plugin_out/variantCallerMerge.x
     this_dir = self.envDict['DIRNAME']
-    cmd = "perl %s/vcfMerge.pl %s %s" % (this_dir,report_dir,outdir)
+    cmd = "perl %s/vcfMerge.test.pl %s %s" % (this_dir,report_dir,outdir)
 
     print "report dir is: %s" % (report_dir)
-    print "variantCallerMerge plugin outdir is: %s" % (outdir)
+    print "plugin outdir is: %s" % (outdir)
     print "cmd is: %s" % (cmd)
-    
-    #os.system(cmd)
+
+    os.system(cmd)
     print "Finished the variantCallerMerge plugin."
 
   def launch(self,data=None):
     print "Start running the variantCallerMerge plugin."
+
+    # make this ULR
+    # http://10.69.40.7/report/482/metal/plugin_out/variantCallerMerge_out.1642
+    print(self.envDict)
+    
+    #output = subprocess.check_output(['ls', '-l'])
+    with open("status_block.html", "w") as html_fp:
+      html_fp.write("<html><body><pre>")
+      link = "http://10.69.40.7/report/482/metal/plugin_out/variantCallerMerge_out.1642"      
+      html_fp.write("<tr><td>Output directory:</td>       <a href=%s>variantCallerMerge_out.1642</a></td></tr>" % (link))
+      html_fp.write("</pre></body></html>")
     self.merge()
 
 
