@@ -18,26 +18,30 @@ for my $dir (@{$vc_dirs_aref}){
 	# mkdir
 	print "creating $outdir/$dir\n";
 
-	if (-d "$outdir/$dir"){
-		`rm $outdir/$dir`;
-		`mkdir $outdir/$dir`;
-	}else{
-		`mkdir $outdir/$dir`;
-	}
+	#if (-d "$outdir/$dir"){
+	#	`rm $outdir/$dir`;
+	#	`mkdir $outdir/$dir`;
+	#}else{
+	#	`mkdir $outdir/$dir`;
+	#}
 
-	my $vc_dir = "$report_dir/$dir";
+	my $vc_dir = "$report_dir/plugin_out/$dir";
+	#print "$vc_dir\n";
 	# get all TSVC_variants.vcf
 	my @vcf = glob "$vc_dir/*/TSVC_variants.vcf";
 
-	# if this vcf is from cov-2 sample?
+	# if this vcf is from sars-cov-2 sample?
 	# vcf contain "2019-nCoV"
-	my @cov_vcf;
+	my @cov_vcf; # SARS vcf
 	for my $vcf (@vcf){
-		my $if_cov2_vcf = &check_if_cov2_vcf();
+		#print "$vcf\n";
+		my $if_cov2_vcf = &check_if_cov2_vcf($vcf);
 		if ($if_cov2_vcf eq "YES"){
+			print "[SARS-CoV-2 VCF]: $vcf\n";
 			push @cov_vcf, $vcf;
 		}else{
-			print "[NOT SARS-CoV-2 VCF]: $vcf\n";
+			#print "[NOT SARS-CoV-2 VCF]: $vcf\n";
+			next;
 		}
 	}
 
@@ -64,15 +68,15 @@ for my $dir (@{$vc_dirs_aref}){
 			$sample_vars{$barcode}{$var} = $freq;
 
 			my $pos = $arr[1];
-			push @{$all_vars{$pos}}, $var;
+			push @{$all_vars{$pos}}, $var; # 1) one pos may has diff variants; 2) may contain dup vars
 		}
 		close VCF;
 	}
 
 	# outdir is /results/analysis/output/Home/2019-nCoV-map2hg19-exon-virus_241/plugin_out/variantCaller_out.1535
-	my $plugin_number = basename($outdir);
-	my $outfile = "$outdir/$plugin_number\.TSVC_variants.Merged.vcf";
-
+	#my $plugin_number = basename($outdir);
+	my $outfile = "$outdir/$dir\.TSVC_variants.merged.vcf.xls";
+	print "[Merge VCF is]: $outfile\n";
 	# Chrom/Position/Ref/Variant/IonXpress_001.Freq/IonXpress_002.Freq/.../
 	# 2019-nCoV/210/G/T/1/0.98/.../
 	
@@ -85,8 +89,8 @@ for my $dir (@{$vc_dirs_aref}){
 	foreach my $s (keys %sample){
 		my $num = (split /\_/, $s)[1]; # 001/002
 		$num =~ s/^[0+]//;
-		$bar_ser = (split /\_/, $s)[0];
-		$sample_tmp{$num} = $bar_ser;
+		my $barcode_str = (split /\_/, $s)[0];
+		$sample_tmp{$num} = $barcode_str;
 	}
 
 	foreach my $num (sort { $a <=> $b } keys %sample_tmp){
@@ -116,7 +120,12 @@ for my $dir (@{$vc_dirs_aref}){
 	# sort variant by pos
 	foreach my $pos (sort { $a <=> $b } keys %all_vars){
 		my $var_aref = $all_vars{$pos}; # one pos may have multi var type
-		for my $var (@{$var_aref}){ # 2019-nCoV:210:G:T
+		my %uniq_var;
+		for my $var (@{$var_aref}){
+			$uniq_var{$var} = 1;
+		}
+
+		for my $var (keys %uniq_var){ # 2019-nCoV:210:G:T
 			my @var = split /\:/, $var;
 			print O "$var[0]\t$var[1]\t$var[2]\t$var[3]";
 			for my $s (@sample_by_order){
@@ -133,7 +142,6 @@ for my $dir (@{$vc_dirs_aref}){
 	}
 	close O;
 }
-
 
 
 
