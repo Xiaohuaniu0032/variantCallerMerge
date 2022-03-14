@@ -17,14 +17,13 @@ my $vc_dirs_aref = &get_vc_dir_by_run_time($report_dir);
 for my $dir (@{$vc_dirs_aref}){
 	# mkdir
 	print "creating $outdir/$dir\n";
-	`mkdir $outdir/$dir`;
 
-	#if (-d "$outdir/$dir"){
-	#	`rm $outdir/$dir`;
-	#	`mkdir $outdir/$dir`;
-	#}else{
-	#	`mkdir $outdir/$dir`;
-	#}
+	if (-d "$outdir/$dir"){
+		`rm $outdir/$dir`;
+		`mkdir $outdir/$dir`;
+	}else{
+		`mkdir $outdir/$dir`;
+	}
 
 	my $vc_dir = "$report_dir/$dir";
 	# get all TSVC_variants.vcf
@@ -172,11 +171,12 @@ sub get_vc_dir_by_run_time{
 		my $basedir = dirname($json);
 		my $vc_name = basename($basedir);
 		if ($vc_name =~ /variantCaller/){
+			next if ($vc_name =~ /variantCallerMerge/);
 			# variantCaller_out.1257/
 			# SARS_CoV_2_variantCaller_out.1529/
 			push @vc_dirs, $vc_name;
 		}
 	}
 
-	return(\%vc_dirs);
+	return(\@vc_dirs);
 }

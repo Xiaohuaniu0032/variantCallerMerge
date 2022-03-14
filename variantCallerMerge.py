@@ -31,7 +31,7 @@ class variantCallerMerge(IonPlugin):
     report_dir = self.envDict['ANALYSIS_DIR'] # /results/analysis/output/Home/Auto_xxx
     outdir = '/results/analysis' + self.envDict['TSP_URLPATH_PLUGIN_DIR'] # /results/analysis/output/Home/Auto_xxx/plugin_out/variantCallerMerge.x
     this_dir = self.envDict['DIRNAME']
-    cmd = "perl %s/vcfMerge.test.pl %s %s" % (this_dir,report_dir,outdir)
+    cmd = "perl %s/vcfMerge.pl %s %s" % (this_dir,report_dir,outdir)
 
     print "report dir is: %s" % (report_dir)
     print "plugin outdir is: %s" % (outdir)
@@ -43,30 +43,20 @@ class variantCallerMerge(IonPlugin):
   def launch(self,data=None):
     print "Start running the variantCallerMerge plugin."
 
-    start_plugin_json = '/results/analysis' + os.path.join(os.getenv('TSP_URLPATH_PLUGIN_DIR'),'startplugin.json')
-    print(start_plugin_json)
-    with open(start_plugin_json, 'r') as fh:
-      spj = json.load(fh)
-      net_location = spj['runinfo']['net_location']
-    
-    net_location = "http://9RPWLN2"
-    print(net_location)
-    # make this url
-    # http://IP/report/X[number]/metal/plugin_out/variantCallerMerge.x
+    #start_plugin_json = '/results/analysis' + os.path.join(os.getenv('TSP_URLPATH_PLUGIN_DIR'),'startplugin.json')
+    #print(start_plugin_json)
+    #with open(start_plugin_json, 'r') as fh:
+    #  spj = json.load(fh)
+    #  net_location = spj['runinfo']['net_location']
 
-    #net_location = "http://9RPWLN2"
-    
     # /results/analysis/output/Home/S5yanzheng-20211223-chip2-MeanAccuracy_v2_482
     # here report_number is 482
     report_dir = self.envDict['ANALYSIS_DIR'] # /results/analysis/output/Home/Auto_xxx
     report_number = report_dir.split('_')[-1]
-    
     this_plugin_dir = os.getenv('TSP_URLPATH_PLUGIN_DIR').split('/')[-1]
-
-    #full_link = os.path.join(net_location,"report",report_number,"metal","plugin_out",this_plugin_dir)
     # ../../../../../report/{{runinfo_pk}}/metal/plugin_out/{{output_dir}}
     full_link = "../../../../../report/%s/metal/plugin_out/%s" % (report_number,this_plugin_dir)
-    print(full_link)
+    #print(full_link)
 
     with open("status_block.html", "w") as html_fp:
       html_fp.write('<html><body><pre>')
