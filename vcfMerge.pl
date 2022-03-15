@@ -61,17 +61,48 @@ for my $dir (@{$vc_dirs_aref}){
 			if ($arr[0] ne "2019-nCoV"){
 				next; # skip
 			}
-			my $var = "$arr[0]\:$arr[1]\:$arr[3]\:$arr[4]"; # 2019-nCoV:210:G:T
-			my $freq_tmp = (split /\;/, $arr[7])[0]; # AF=1
-			my $freq = (split /\=/, $freq_tmp)[1]; # freq is 0.98
+			
+			my @var;
+			if ($arr[4] =~ /\,/){
+				# 包含>=2个alt allele
+				my $gt = (split /\:/, $arr[-1])[0]; # 1/1
+				my @gt = split /\//, $gt; # [1,1] => 纯合突变 OR [1,2] 双杂合突变
+				my @alt = split /\,/, $arr[4]; # [CAT,CTAT]
+				my $freq_tmp = (split /\;/, $arr[7])[0]; # AF=1,0
+				$freq_tmp =~ s/^AF=//;
+				my @freq = split /\,/, $freq_tmp;
 
-			$sample_vars{$barcode}{$var} = $freq;
+				my $idx = 0;
+				my @allele;
+				push @allele, $arr[3];
+				for my $v (@alt){
+					push @allele, $v;
+				}
 
-			my $pos = $arr[1];
-			push @{$all_vars{$pos}}, $var; # 1) one pos may has diff variants; 2) may contain dup vars
+				for my $gt (@gt){
+					my $gt_int = int($gt);
+					if ($gt_int >= 1){
+						# 有效的突变
+						my $alt = $allele[$gt_int];
+						my $freq = $freq[$gt_int-1];
+						my $var = "$arr[0]\:$arr[1]\:$arr[3]\:$alt"; # 2019-nCoV:210:G:T
+						$sample_vars{$barcode}{$var} = $freq;
+						my $pos = $arr[1];
+						push @{$all_vars{$pos}}, $var; # 1) one pos may has diff variants; 2) may contain dup vars
+					}
+				}
+			}else{
+				my $freq_tmp = (split /\;/, $arr[7])[0]; # AF=1
+				my $freq = (split /\=/, $freq_tmp)[1]; # freq is 0.98
+				my $var = "$arr[0]\:$arr[1]\:$arr[3]\:$arr[4]"; # 2019-nCoV:210:G:T
+				$sample_vars{$barcode}{$var} = $freq;
+				my $pos = $arr[1];
+				push @{$all_vars{$pos}}, $var; # 1) one pos may has diff variants; 2) may contain dup vars
+			}
 		}
 		close VCF;
 	}
+
 
 	# outdir is /results/analysis/output/Home/2019-nCoV-map2hg19-exon-virus_241/plugin_out/variantCaller_out.1535
 	#my $plugin_number = basename($outdir);
