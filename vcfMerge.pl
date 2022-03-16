@@ -104,7 +104,7 @@ for my $dir (@{$vc_dirs_aref}){
 	open O, ">$outfile" or die;
 	print O "Chrom\tPosition\tRef\tVariant";
 
-	my @barcode = values %sample;
+	my @barcode = keys %sample;
 	my @barcode_sort = sort {$a cmp $b} @barcode;
 
 	for my $s (@barcode_sort){
