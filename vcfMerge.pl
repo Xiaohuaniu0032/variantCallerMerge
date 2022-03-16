@@ -15,16 +15,6 @@ my $vc_dirs_aref = &get_vc_dir_by_run_time($report_dir);
 
 # for each variantCaller_out.*, creat a new dir
 for my $dir (@{$vc_dirs_aref}){
-	# mkdir
-	print "creating $outdir/$dir\n";
-
-	#if (-d "$outdir/$dir"){
-	#	`rm $outdir/$dir`;
-	#	`mkdir $outdir/$dir`;
-	#}else{
-	#	`mkdir $outdir/$dir`;
-	#}
-
 	my $vc_dir = "$report_dir/plugin_out/$dir";
 	#print "$vc_dir\n";
 	# get all TSVC_variants.vcf
@@ -45,12 +35,12 @@ for my $dir (@{$vc_dirs_aref}){
 		}
 	}
 
-	my %sample_vars;
-	my %all_vars;
-	my %sample;
+	my %sample_vars; # 记录特定样本的变异
+	my %all_vars;    # 记录这个run下所有样本的变异
+	my %sample;      # 样本名称(barcode编号)
 	for my $vcf (@cov_vcf){
 		my $base_dir = dirname($vcf);
-		my $barcode = basename($base_dir);
+		my $barcode = basename($base_dir); # IonXpress_001 / IonCode_0109
 		$sample{$barcode} = 1; # barcode [IonXpress_001]
 
 		open VCF, "$vcf" or die;
@@ -59,7 +49,7 @@ for my $dir (@{$vc_dirs_aref}){
 			next if (/^\#/); #skip # line
 			my @arr = split /\t/;
 			if ($arr[0] ne "2019-nCoV"){
-				next; # skip
+				next; # only keep 2019-nCoV chrom
 			}
 			
 			my @var;
@@ -114,36 +104,10 @@ for my $dir (@{$vc_dirs_aref}){
 	open O, ">$outfile" or die;
 	print O "Chrom\tPosition\tRef\tVariant";
 
-	# print sample name by barcode numbering
-	my @sample_by_order;
-	my %sample_tmp;
-	foreach my $s (keys %sample){
-		my $num = (split /\_/, $s)[1]; # 001/002
-		$num =~ s/^[0+]//;
-		my $barcode_str = (split /\_/, $s)[0];
-		$sample_tmp{$num} = $barcode_str;
-	}
+	my @barcode = values %sample;
+	my @barcode_sort = sort {$a cmp $b} @barcode;
 
-	foreach my $num (sort { $a <=> $b } keys %sample_tmp){
-		# check num's length
-		my $barcode_str = $sample_tmp{$num}; # IonXpress
-		my @num = split //, $num;
-		my $new_num; # trans 1 into 001
-		if (@num == 1){
-			$new_num = "00".$num;
-		}
-		if (@num == 2){
-			$new_num = "0".$num;
-		}
-		if (@num == 3){
-			$new_num = $num;
-		}
-
-		my $new_barcode = $barcode_str."_".$new_num; # IonXpress_001
-		push @sample_by_order, $new_barcode;
-	}
-
-	for my $s (@sample_by_order){
+	for my $s (@barcode_sort){
 		print O "\t$s";
 	}
 	print O "\n";
@@ -159,7 +123,7 @@ for my $dir (@{$vc_dirs_aref}){
 		for my $var (keys %uniq_var){ # 2019-nCoV:210:G:T
 			my @var = split /\:/, $var;
 			print O "$var[0]\t$var[1]\t$var[2]\t$var[3]";
-			for my $s (@sample_by_order){
+			for my $s (@barcode_sort){
 				my $freq;
 				if (exists $sample_vars{$s}{$var}){
 					$freq = $sample_vars{$s}{$var};
