@@ -130,3 +130,9 @@ Chrom	Position	Ref	Variant	IonXpress_001	IonXpress_003	IonXpress_004	IonXpress_0
 > 点击蓝色链接下载即可。xls格式。
 
 ![variantCallerMerge](https://github.com/Xiaohuaniu0032/variantCallerMerge/blob/main/variantCallerMerge.png)
+
+
+### 插件安装
+
+1) 压缩`variantCallerMerge`目录为`.zip`文件：`zip -r variantCallerMerge.zip variantCallerMerge -x \*.git\*`
+2) 在TS页面上传`.zip`文件进行安装：TS页面右上角小齿轮->Plugins->Install or Upgrade Plugin -> Selete File -> Upload and Install
